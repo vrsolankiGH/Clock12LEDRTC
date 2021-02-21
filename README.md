@@ -2,10 +2,14 @@
 
 This is a simple 12 LED clock. For the list of material and step-by-step detailed guide on how to make it, please refer my instructables project from here https://www.instructables.com/12Digit-Clock-With-WS2812B-NeoPixel-LED-and-DS1307/
 
+Circuit : For Data pin of WS2812b neo pixel, arduino pin 7 is defined into the sketch and for DS1307RTC, data pin SCL->A5 and SDA->A4, for Button Pin -> 2 -> Button -> Ground
 
-The code used in the turtorial is given in this repository.
+Library included is 
+1. Adafruit Neo Pixel for WS2812B neo pixel led.
+2. RTCLib for DS1307RTC module
+3. OneButton for Button press events
 
-ChangeLOG :
+For Details about Neo Pixel library visit https://learn.adafruit.com/adafruit-neopixel-uberguide/arduino-library-use , for DS1307RTC visit https://lastminuteengineers.com/ds1307-rtc-arduino-tutorial/ and for OneButton examples visit https://github.com/mathertel/OneButton github repository or http://www.mathertel.de/Arduino/OneButtonLibrary.aspx 
 
-1. V1 This code is working fine for Clock part
-2. V2 This code is working fine with OneButton library and you can set Hour, Minute and Second by long pressing and then single click. First Long press will enter into Hour setup and after that till you want to change/Add hour, single button press or click will add hour and set it to Hour part, 2nd Long Press will enter into Minute setting and like wise for seconds too. Date setting is still pending to do in same way and work is going on for the same. After all this date time functanility will be completed, code optimazation and beautification will be done.
+The code used in the turtorial is given in this repository and instructable is also there on instructables.com for which link is given in this file.
+
