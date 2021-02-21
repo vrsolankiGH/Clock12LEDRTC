@@ -4,9 +4,9 @@
 
 #define PIN        7 // DataPIN on Arduino Uno
 #define NUMPIXELS 12 // Total Number of Pixels for Clock
-#define ButtonPIN 4 // Tectile button pin number
+#define ButtonPIN 2 // Tectile button pin number
 
-
+int setState = 0;
 /**
  * Initialize a new OneButton instance for a button
  * connected to digital pin 4 and GND, which is active low
@@ -67,9 +67,9 @@ void setup() {
   pixels.fill(white,0); // Fills all pixles with white color as indication of start of clock
   pixels.setBrightness(127); // Set brightness to half for all pixels, this can be changed according to daylight ...
   pixels.show(); 
-  delay(100);
+  delay(1000);
   pixels.clear(); // Show all 'off' so that previous shown will be cleared
-  delay(100);
+  delay(1000);
   // uint32_t color = strip.getPixelColor(11); // Get previously set color of pixel
   // uint16_t n = strip.numPixels();  // How many pixels is previously set
   // strip.setBrightness(64); // Set brightness to 1/4 from 0...255
@@ -99,21 +99,31 @@ void setup() {
     //rtc.adjust(DateTime(2021,2,18,18,32,0));
   }
 
-
+  btn.attachLongPressStart(longPressStart);
+  btn.attachLongPressStop(longPressStop);
+  btn.attachDuringLongPress(longPressDuring);
+  btn.attachClick(handleClick);
+  btn.setDebounceTicks(60); // Default 50
+  btn.setClickTicks(700); // Default 500
+  btn.setPressTicks(1500); // Default 800
 }
 
 // Handler function for a single click:
 static void handleClick() {
   Serial.println("Clicked!");
+  Button_click();
 }
 
 // Single Click event attachment
-btn.attachClick(handleClick);
+//btn.attachClick(handleClick);
 
 // Double Click event attachment with lambda
-btn.attachDoubleClick([]() {
-  Serial.println("Double Pressed!");
-});
+// btn.attachDoubleClick([]() {
+//  Serial.println("Double Pressed!");
+//});
+int ss1 = 0;
+int mn1 = 0;
+int hr1 = 0;
 
 void loop() 
 {
@@ -125,7 +135,9 @@ DateTime now = rtc.now();
 hr = (now.hour()%HourFormat12) - 0;  // this will be now.hour() if following if (hr != 12) is active 
 mn = (((now.minute()+4)/5)%HourFormat12) - 0; // Turn into 5 minute interval (For 12 pixels) and to zero base
 ss = (((now.second()+4)/5)%HourFormat12) - 0; // Turn into 5 second interval (For 12 pixels) and to zero base
-
+mn1 = now.minute();
+hr1 = now.hour();
+ss1 = now.second();
 whiteColor(hr,mn,ss); // Show 12,3,6,9 as white indication color for better visual clock
 
 btn.tick();
@@ -133,17 +145,15 @@ btn.tick();
 /*
  * 
     // in case you need to change each 5 minute hands with style
-
     if (hr != 12)
       { hr %= 12;}
     else 
       { hr = 12; }
-
     // hr = hr - 1; // non zero based led display change according to your need;
     // mn = mn - 1;
     // ss = ss - 1;
-
  */
+
 
     if (hr == mn)
       {
@@ -159,9 +169,12 @@ btn.tick();
     pixels.setPixelColor(ss, red); // Show second in red color
    // Turn on following line for any fancy effect you may want to change it to ...
    // pixels.fill(red,ss-1,3); // (color,first,count) fill red color with previous second, current second, next second
-    pixels.show(); // Show pixels 
-    delay(100); // Delay for better view and time to show pixels
+    //whiteColor(hr,mn,ss); // Show 12,3,6,9 as white indication color for better visual clock
 
+    pixels.show(); // Show pixels 
+    btn.tick();
+    delay(10); // Delay for better view and time to show pixels
+    btn.tick();
 if (IsDisplaySerial)
     {
         // Print current date and time before change of serial input
@@ -207,7 +220,9 @@ if (IsDisplaySerial)
             rtc.adjust(DateTime(yy,mm,dd,hr,mn));
   
           }
+          btn.tick();
           delay(10);
+          btn.tick();
           Serial.flush();
        // Serial.print(" since midnight 1/1/1970 = ");
        // Serial.print(now.unixtime());
@@ -218,12 +233,15 @@ if (IsDisplaySerial)
     } // If serial display is turned on
  
   pixels.clear(); // Clear/Off all pixels 
-  delay(100); // Wait for better time for pixels
+  btn.tick();
+  delay(10); // Wait for better time for pixels
+  btn.tick();
 }
 
 void whiteColor(int hr,int mn,int ss)
 // Show 12,3,6,9 in clock as white for indication 
 {
+    
     uint32_t white = pixels.Color(30,30,30);
     pixels.clear();
     pixels.setPixelColor(0,white); // 12 hour sign
@@ -231,6 +249,80 @@ void whiteColor(int hr,int mn,int ss)
     pixels.setPixelColor(6,(hr=6)?white:green); // 6  hour sign
     pixels.setPixelColor(9,(hr=9)?white:green); // 9  hour sign
     pixels.show();  // Show all hour visual sign
+  
+
+}
+
+
+void Button_click(){
+  if(setState == 0){
+    Serial.println("setting hour");
+    Button_click_util();
+  }
+  else if(setState == 1){
+    Serial.println("setting minute");
+    Button_click_util();
+  }
+  else if(setState == 2){
+    Serial.println("setting second");
+    Button_click_util();
   }
 
- 
+
+}
+void Button_click_util(){
+  if(setState == 0){
+    Serial.println("current hour");
+    if(hr > 24)hr = 0;
+    Serial.println(hr);
+    pixels.setPixelColor(hr,green);
+    pixels.fill(hr,green);
+    pixels.show();
+//    hr++;
+    hr1++;
+    if(hr1 > 24)hr1 = 0;
+  }
+  else if(setState == 1){
+    Serial.println("current minute");
+    if(mn > 12)mn = 0;
+    Serial.println(mn1);
+    pixels.setPixelColor(mn,blue);
+    pixels.fill(mn,blue);
+    pixels.show();
+    mn1++;
+    if(mn1 > 60)mn1 = 0;
+  }
+  else if(setState == 2){
+    Serial.println("current second");
+    if(ss > 12)ss  = 0;
+    Serial.println(ss);
+    pixels.setPixelColor(ss,red);
+    pixels.fill(ss,red);
+    pixels.show();
+//    Serial.print("Second increasing  ");
+//    ss+=5;
+    ss1++;
+    if(ss1 > 60)ss1 = 0;
+    Serial.println(ss1);
+  
+  }
+   rtc.adjust(DateTime(yy,mm,dd,hr1,mn1,ss1));
+}
+
+void longPressStart() {
+  Serial.println("Button 1 longPress start");
+
+}
+
+void longPressStop() {
+  Serial.println("Button 1 longPress stop");
+  setState++;
+  if(setState == 3){
+    setState = 0;
+  }
+
+} // longPressStop1
+
+void longPressDuring(){
+
+}
