@@ -13,3 +13,6 @@ For Details about Neo Pixel library visit https://learn.adafruit.com/adafruit-ne
 
 The code used in the turtorial is given in this repository and instructable is also there on instructables.com for which link is given in this file.
 
+V1 = Simple clock with time setting by Serial Monitor only.
+V2 = Simple clock with time setting by Serial Monitor and by button (Tectile Switch) attached to arduino pin 2.
+V3 = V2 and DMD 32x16 Panel display with logo message, in this version we need to display date, time and display of date time setting through pin 2, is under implementation ...
