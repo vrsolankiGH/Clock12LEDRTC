@@ -16,3 +16,4 @@ The code used in the turtorial is given in this repository and instructable is a
 V1 = Simple clock with time setting by Serial Monitor only.
 V2 = Simple clock with time setting by Serial Monitor and by button (Tectile Switch) attached to arduino pin 2.
 V3 = V2 and DMD 32x16 Panel display with logo message, in this version we need to display date, time and display of date time setting through pin 2, is under implementation ...
+V4 = V3 and code adapted for Nano, almost same no change.
