@@ -14,7 +14,7 @@
 #define NeoPixelDataPIN  4 // D4=4 in nano DataPIN for Neo Pixel on Arduino Uno 7
 #define NUMPIXELS 12 // Total Number of Pixels for Clock
 #define ButtonPIN 2 // Tectile button pin number, PIN2 - Button - Ground
-#define PIRPIN A1 // PIR pin for present sensor view pattern
+#define PIRPIN A1 // PIR pin for present sensor view pattern A1=20
 
 boolean IsDisplaySerial = false; // Set to true for Get/Set Date time in yymmddhhmmss format as input to serial communication ...
 
@@ -81,7 +81,7 @@ int hr1 = 0; // To get Hour from ButtonPIN when clicked after LongPress
 const int HourFormat12 = 12;
 
 int PIRPINState = 0; // Initialise PIR PIN
-
+bool noRTC = false;
 String hrs = ""; // String to get yymmddhhmmss from Serial terminal
 
 // Starts main program setup section
@@ -107,7 +107,7 @@ void setup() {
     delay(10);
   }
   // Set brightness according to person present near to clock or not
-  if (PIRPINState != 0)
+  if (PIRPINState >= 100)
   {
     // pixels.fill(white,0); // Fills all pixles with white color as indication of start of clock
     pixels.setBrightness(255); // Set brightness to full for all pixels, if there is someone near to clock
@@ -116,11 +116,12 @@ void setup() {
   {
     // pixels.fill(white,0); // Fills all pixles with white color as indication of start of clock
     pixels.setBrightness(65); // Set brightness to 1/4th for all pixels, this can be changed according to daylight ...
+    Serial.println("PIR Detected...");
   }
   pixels.show();
-  delay(1000);
+  delay(10);
   pixels.clear(); // Show all 'off' so that previous shown will be cleared
-  delay(1000);
+  delay(10);
   // uint32_t color = strip.getPixelColor(11); // Get previously set color of pixel
   // uint16_t n = strip.numPixels();  // How many pixels is previously set
   // strip.setBrightness(64); // Set brightness to 1/4 from 0...255
@@ -129,7 +130,14 @@ void setup() {
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     Serial.flush();
-    abort(); // Because if there is no RTC, clock has no meaning
+    noRTC = true;
+    //abort(); // Because if there is no RTC, clock has no meaning
+    // Instead of abort, Just play pattern on Pixels and Message on P10
+  }
+  else
+  {
+    noRTC = false;
+    playPattern();
   }
 
   if (! rtc.isrunning())
@@ -193,8 +201,13 @@ void loop()
   String hrsd;
 
   //hrsd = String(hrsdisplay);
+  if (! noRTC){
   hrsd = ((dd<=9)?"0":"") + String(dd) + "/" + ((mm<=9)?"0":"") + String(mm) + "/" + ((yy<=9)?"0":"") + String(yy) + " - " +  ((hr1<=9)?"0":"") +String(hr1) + ":" + ((mn1<=9)?"0":"") + String(mn1) + ":" + ((ss1<=9)?"0":"") + String(ss1);
-
+  }
+  else{
+    hrsd = "Welcome to Clock12LedRTC; by Vipul Solanki";
+    playPattern();
+  }
   
   whiteColor(hr, mn, ss); // Show 12,3,6,9 as white indication color for better visual clock
 
@@ -321,6 +334,18 @@ void loop()
   btn.tick();
 } // Main loop ends here ...
 
+void playPattern()
+{
+  int c;
+  pixels.clear();
+  for (int c=0;c<=11;c++)  {
+  for (int i=0,j=0,k=0;i<=255 && k <= 255 && j <= 255;i++,j++,k++) {
+//  for (int j=0;j<=255;j++) {
+//  for (int k=0;k<=255;k++) {  
+  pixels.setPixelColor(c,pixels.Color(i,j,k));
+  pixels.show();
+  }
+  }}//}}
 void whiteColor(int hr, int mn, int ss)
 {
   // Show 12,3,6,9 in clock as white for indication
